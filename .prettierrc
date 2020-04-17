@@ -1,0 +1,17 @@
+{
+  "arrowParens": "avoid",
+  "endOfLine": "lf",
+  "printWidth": 120,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "none",
+  "useTabs": false,
+  "overrides": [
+    {
+      "files": ["./src/**/*.ts"],
+      "options": {
+        "trailingComma": "es5"
+      }
+    }
+  ]
+}
