@@ -1,2 +1,2 @@
-export { Payment, CheckoutItem } from './Payment';
-export { Invoice, InvoiceCarrierType } from './Invoice';
+export { PaymentGateway, CheckoutItem } from './Payment';
+export { InvoiceGateway, Invoice, InvoiceCarrierType } from './Invoice';

@@ -40,7 +40,7 @@ export interface CheckoutItem {
   amount: number;
 }
 
-export class Payment {
+export class PaymentGateway {
   HOST: string;
   MERCHANT_ID: string;
   HASH_KEY: string;

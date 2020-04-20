@@ -1,6 +1,6 @@
 {
   "name": "ecpay-gateway",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "ECPay Payment Gateway",
   "main": "lib/index.js",
   "scripts": {
@@ -28,6 +28,8 @@
   },
   "homepage": "https://github.com/Rytass/ecpay-gateway#readme",
   "devDependencies": {
+    "@commitlint/cli": "^8.3.5",
+    "@commitlint/config-conventional": "^8.3.4",
     "@types/axios": "^0.14.0",
     "@types/debug": "^4.1.5",
     "@types/node": "^13.13.0",

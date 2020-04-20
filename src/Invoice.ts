@@ -2,6 +2,9 @@ import { v4 as uuid } from 'uuid';
 import axios from 'axios';
 import crypto from 'crypto';
 import debug from 'debug';
+import parse from 'date-fns/parse';
+import format from 'date-fns/format';
+import getYear from 'date-fns/getYear';
 import {
   InvalidNaturalCarrierNumberType,
   InvalidMobileCarrierNumberType,
@@ -57,9 +60,9 @@ interface InvoiceCarrier {
 
 interface InvoiceItem {
   amount: number;
-  price: number;
+  unitPrice: number;
   name: string;
-  unit: string;
+  unit?: string;
 }
 
 interface IssueInvoiceArguments {
@@ -105,6 +108,88 @@ interface InvalidAllowanceArguments {
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 export class Invoice {
+  taxRatio: number = 0.05;
+  yearMonth: string;
+  number: string;
+  prefix: string;
+  randomCode: string;
+  createdAt: string; // YYYY-MM-DD HH:mm:ss
+  buyerUAT: string | undefined;
+  sellerUAT: string;
+  items: Array<InvoiceItem>;
+
+  hashKey: string = 'INVOICE_HASH_KEY';
+  hashIv: string = 'INVOICE_HASH_IV_';
+
+  constructor({
+    number,
+    prefix,
+    randomCode,
+    createdAt,
+    buyerUAT,
+    sellerUAT,
+    items,
+  }: {
+    number: string;
+    prefix: string;
+    randomCode: string;
+    createdAt: string; // YYYY-MM-DD HH:mm:ss
+    buyerUAT?: string;
+    sellerUAT: string;
+    items: Array<InvoiceItem>;
+  }) {
+    this.number = number;
+    this.prefix = prefix.toUpperCase();
+    this.randomCode = randomCode;
+    this.createdAt = createdAt;
+    this.buyerUAT = buyerUAT;
+    this.sellerUAT = sellerUAT;
+    this.items = items;
+  }
+
+  get totalTaxFreePrice() {
+    return this.items.reduce((sum, item) => sum + Math.round(item.unitPrice / (1 + this.taxRatio)) * item.amount, 0);
+  }
+
+  get getTotalPrice() {
+    return this.items.reduce((sum, item) => sum + item.unitPrice * item.amount, 0);
+  }
+
+  get invoiceNumber() {
+    return `${this.prefix}-${this.number}`;
+  }
+
+  get firstQRCodeText() {
+    const cipher = crypto.createCipheriv('aes-128-cbc', this.hashKey, this.hashIv);
+    cipher.setAutoPadding(true);
+
+    return `${this.prefix}${this.number}${
+      getYear(parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date())) - 1911
+    }${format(parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date()), 'MMdd')}${
+      this.randomCode
+    }${`${this.totalTaxFreePrice}`.padStart(8, '0')}${`${this.getTotalPrice}`.padStart(8, '0')}${
+      this.buyerUAT || '00000000'
+    }${this.sellerUAT}${[
+      cipher.update(`${this.prefix}${this.number}${this.randomCode}`, 'utf8', 'base64'),
+      cipher.final('base64'),
+    ].join('')}:**********:${this.items.length}:${Math.max(this.items.length, 2)}:1:${this.items
+      .slice(0, 2)
+      .map(item => `${item.name}:${item.amount}:${item.unitPrice}`)
+      .join(':')}`;
+  }
+
+  get secondQRCodeText() {
+    const cipher = crypto.createCipheriv('aes-128-cbc', this.hashKey, this.hashIv);
+    cipher.setAutoPadding(true);
+
+    return `**${this.items
+      .slice(2)
+      .map(item => `${item.name}:${item.amount}:${item.unitPrice}`)
+      .join(':')}`;
+  }
+}
+
+export class InvoiceGateway {
   HOST: string;
   MERCHANT_ID: string;
   HASH_KEY: string;
@@ -426,15 +511,15 @@ export class Invoice {
           InvoiceDate: invoiceDate,
           AllowanceNotify: 'E',
           NotifyMail: email,
-          AllowanceAmount: items.reduce((sum, item) => sum + item.price * item.amount, 0),
+          AllowanceAmount: items.reduce((sum, item) => sum + item.unitPrice * item.amount, 0),
           Items: items.map((item, index) => ({
             ItemSeq: index,
             ItemName: item.name,
             ItemCount: item.amount,
-            ItemWord: item.unit,
-            ItemPrice: item.price,
+            ItemWord: item.unit || '式',
+            ItemPrice: item.unitPrice,
             ItemTaxType: '1',
-            ItemAmount: item.amount * item.price,
+            ItemAmount: item.amount * item.unitPrice,
             ItemRemark: '',
           })),
         }),
@@ -504,19 +589,19 @@ export class Invoice {
           Print: carrierType === InvoiceCarrierType.PRINT ? '1' : '0',
           Donation: carrierType === InvoiceCarrierType.LOVE_CODE ? '1' : '0',
           LoveCode: carrierType === InvoiceCarrierType.LOVE_CODE ? await this.getValidLoveCode(loveCode) : '',
-          CarrierType: Invoice.getCarrierTypeCode(carrierType),
+          CarrierType: InvoiceGateway.getCarrierTypeCode(carrierType),
           CarrierNum: await this.getValidCarrierNumber(carrierType, carrierNumber),
           TaxType: '1',
-          SalesAmount: items.reduce((sum, item) => sum + item.price * item.amount, 0),
+          SalesAmount: items.reduce((sum, item) => sum + item.unitPrice * item.amount, 0),
           InvoiceRemark: '',
           Items: items.map((item, index) => ({
             ItemSeq: index,
             ItemName: item.name,
             ItemCount: item.amount,
-            ItemWord: item.unit,
-            ItemPrice: item.price,
+            ItemWord: item.unit || '式',
+            ItemPrice: item.unitPrice,
             ItemTaxType: '1',
-            ItemAmount: item.amount * item.price,
+            ItemAmount: item.amount * item.unitPrice,
             ItemRemark: '',
           })),
           InvType: '07',
