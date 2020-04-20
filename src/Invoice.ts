@@ -167,6 +167,16 @@ export class Invoice {
     return `${year}年${`${startMonth}`.padStart(2, '0')}-${`${endMonth}`.padStart(2, '0')}月`;
   }
 
+  get barcodeText(): string {
+    const date = parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+    const year = getYear(date) - 1911;
+    const month = getMonth(date) + 1;
+    const endMonth = Math.ceil(month / 2) * 2;
+
+    return `${year}${`${endMonth}`.padStart(2, '0')}${this.prefix}${this.number}${this.randomCode}`;
+  }
+
   get invoiceNumber() {
     return `${this.prefix}-${this.number}`;
   }
