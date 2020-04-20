@@ -5,6 +5,7 @@ import debug from 'debug';
 import parse from 'date-fns/parse';
 import format from 'date-fns/format';
 import getYear from 'date-fns/getYear';
+import getMonth from 'date-fns/getMonth';
 import {
   InvalidNaturalCarrierNumberType,
   InvalidMobileCarrierNumberType,
@@ -151,8 +152,19 @@ export class Invoice {
     return this.items.reduce((sum, item) => sum + Math.round(item.unitPrice / (1 + this.taxRatio)) * item.amount, 0);
   }
 
-  get getTotalPrice() {
+  get totalPrice() {
     return this.items.reduce((sum, item) => sum + item.unitPrice * item.amount, 0);
+  }
+
+  get yearMonthText(): string {
+    const date = parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date());
+
+    const year = getYear(date) - 1911;
+    const month = getMonth(date) + 1;
+    const endMonth = Math.ceil(month / 2) * 2;
+    const startMonth = endMonth - 1;
+
+    return `${year}年${`${startMonth}`.padStart(2, '0')}-${`${endMonth}`.padStart(2, '0')}月`;
   }
 
   get invoiceNumber() {
@@ -167,7 +179,7 @@ export class Invoice {
       getYear(parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date())) - 1911
     }${format(parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date()), 'MMdd')}${
       this.randomCode
-    }${`${this.totalTaxFreePrice}`.padStart(8, '0')}${`${this.getTotalPrice}`.padStart(8, '0')}${
+    }${`${this.totalTaxFreePrice}`.padStart(8, '0')}${`${this.totalPrice}`.padStart(8, '0')}${
       this.buyerUAT || '00000000'
     }${this.sellerUAT}${[
       cipher.update(`${this.prefix}${this.number}${this.randomCode}`, 'utf8', 'base64'),
@@ -175,7 +187,7 @@ export class Invoice {
     ].join('')}:**********:${this.items.length}:${Math.max(this.items.length, 2)}:1:${this.items
       .slice(0, 2)
       .map(item => `${item.name}:${item.amount}:${item.unitPrice}`)
-      .join(':')}`;
+      .join(':')}`.padEnd(180, ' ');
   }
 
   get secondQRCodeText() {
@@ -185,7 +197,7 @@ export class Invoice {
     return `**${this.items
       .slice(2)
       .map(item => `${item.name}:${item.amount}:${item.unitPrice}`)
-      .join(':')}`;
+      .join(':')}`.padEnd(180, ' ');
   }
 }
 
