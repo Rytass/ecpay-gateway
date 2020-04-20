@@ -115,8 +115,8 @@ export class Invoice {
   prefix: string;
   randomCode: string;
   createdAt: string; // YYYY-MM-DD HH:mm:ss
-  buyerUAT: string | undefined;
-  sellerUAT: string;
+  buyerVAT: string | undefined;
+  sellerVAT: string;
   items: Array<InvoiceItem>;
 
   hashKey: string = 'INVOICE_HASH_KEY';
@@ -127,24 +127,24 @@ export class Invoice {
     prefix,
     randomCode,
     createdAt,
-    buyerUAT,
-    sellerUAT,
+    buyerVAT,
+    sellerVAT,
     items,
   }: {
     number: string;
     prefix: string;
     randomCode: string;
     createdAt: string; // YYYY-MM-DD HH:mm:ss
-    buyerUAT?: string;
-    sellerUAT: string;
+    buyerVAT?: string;
+    sellerVAT: string;
     items: Array<InvoiceItem>;
   }) {
     this.number = number;
     this.prefix = prefix.toUpperCase();
     this.randomCode = randomCode;
     this.createdAt = createdAt;
-    this.buyerUAT = buyerUAT;
-    this.sellerUAT = sellerUAT;
+    this.buyerVAT = buyerVAT;
+    this.sellerVAT = sellerVAT;
     this.items = items;
   }
 
@@ -180,8 +180,8 @@ export class Invoice {
     }${format(parse(this.createdAt, 'yyyy-MM-dd HH:mm:ss', new Date()), 'MMdd')}${
       this.randomCode
     }${`${this.totalTaxFreePrice}`.padStart(8, '0')}${`${this.totalPrice}`.padStart(8, '0')}${
-      this.buyerUAT || '00000000'
-    }${this.sellerUAT}${[
+      this.buyerVAT || '00000000'
+    }${this.sellerVAT}${[
       cipher.update(`${this.prefix}${this.number}${this.randomCode}`, 'utf8', 'base64'),
       cipher.final('base64'),
     ].join('')}:**********:${this.items.length}:${Math.max(this.items.length, 2)}:1:${this.items
