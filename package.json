@@ -1,6 +1,6 @@
 {
   "name": "ecpay-gateway",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "ECPay Payment Gateway",
   "main": "lib/index.js",
   "scripts": {

@@ -84,7 +84,7 @@ interface AllowanceInvoiceArguments {
   invoiceNumber: string;
   invoiceDate: string;
   items: Array<InvoiceItem>;
-  email: string;
+  email: string | undefined;
 }
 
 interface IssueInvoiceResponseAllowanceResponse {
@@ -531,8 +531,14 @@ export class InvoiceGateway {
           MerchantID: this.MERCHANT_ID,
           InvoiceNo: invoiceNumber,
           InvoiceDate: invoiceDate,
-          AllowanceNotify: 'E',
-          NotifyMail: email,
+          ...(email
+            ? {
+                AllowanceNotify: 'E',
+                NotifyMail: email,
+              }
+            : {
+                AllowanceNotify: 'N',
+              }),
           AllowanceAmount: items.reduce((sum, item) => sum + item.unitPrice * item.amount, 0),
           Items: items.map((item, index) => ({
             ItemSeq: index,
