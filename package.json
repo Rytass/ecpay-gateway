@@ -8,10 +8,7 @@
     "lint:ts": "eslint ./src --config src/.eslintrc --ext .js,.jsx,.ts,.tsx",
     "lint": "npm run lint:ts",
     "build": "tsc",
-    "commit": "git-cz",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
-    "preversion": "npm run lint"
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
