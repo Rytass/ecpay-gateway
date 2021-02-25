@@ -2,7 +2,7 @@
   "name": "ecpay-gateway",
   "version": "0.1.6",
   "description": "ECPay Payment Gateway",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint:ts": "eslint ./src --config src/.eslintrc --ext .js,.jsx,.ts,.tsx",
