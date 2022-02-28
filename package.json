@@ -2,16 +2,13 @@
   "name": "ecpay-gateway",
   "version": "0.1.6",
   "description": "ECPay Payment Gateway",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint:ts": "eslint ./src --config src/.eslintrc --ext .js,.jsx,.ts,.tsx",
     "lint": "npm run lint:ts",
     "build": "tsc",
-    "commit": "git-cz",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run lint",
-    "preversion": "npm run lint"
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
@@ -30,7 +27,6 @@
   "devDependencies": {
     "@commitlint/cli": "^8.3.5",
     "@commitlint/config-conventional": "^8.3.4",
-    "@types/axios": "^0.14.0",
     "@types/debug": "^4.1.5",
     "@types/node": "^13.13.0",
     "@types/uuid": "^7.0.2",
@@ -44,7 +40,7 @@
     "prettier": "^2.0.4",
     "ts-node": "^8.8.2",
     "ts-node-dev": "^1.0.0-pre.44",
-    "typescript": "^3.8.3"
+    "typescript": "4"
   },
   "dependencies": {
     "axios": "^0.19.2",
@@ -53,6 +49,6 @@
     "uuid": "^7.0.3"
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ]
 }

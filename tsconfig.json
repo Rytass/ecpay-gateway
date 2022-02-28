@@ -4,6 +4,7 @@
     "esModuleInterop": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "declaration": true,
     "importHelpers": true,
     "target": "es2016",
     "module": "commonjs",
@@ -15,6 +16,6 @@
     "strict": true,
     "strictPropertyInitialization": false,
     "sourceMap": true,
-    "outDir": "./lib"
+    "outDir": "./dist"
   }
 }
